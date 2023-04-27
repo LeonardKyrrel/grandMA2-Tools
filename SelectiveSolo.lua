@@ -7,7 +7,7 @@
 --- This plugin was made to provide an alternative to the solo function. Instead of affecting all fixtures 
 --- it only touches the current selection. 
 --- The user can define a lowlight preset in the all preset pool otherwise lowlight is definded as dimmer at 0.
---- Three Macros "Previous", "Set" and "Next" are generated and should can then be used instead of the 
+--- Three Macros "Previous", "Set" and "Next" are generated and must be used instead of the 
 --- buttons on the console to work with the selective solo function. 
 ---
 ---
@@ -19,7 +19,7 @@
 ---
 ---
 ---Notes: 
----     -Update can not be used while working with this plugin!
+---     -Update can not be used to update presets while working with this plugin!
 ---     -Store the lowlight preset at a position in the preset pool that won't be touched, as the plugin writes presets 
 ---      to store values and will overwrite any presets near the lowlight preset
 
