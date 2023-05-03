@@ -101,15 +101,19 @@ MA.get = {
 
 
 MA.set = {
-    
+
     ---sets the property of the object to the specified value if the property is editable
     ---@param obj - gma2 name for the object (e.g. Effect 1.1.1 -> line 1 of effect 1)
     ---@param index - the index of the specific property (e.g. 17 for wings of an effect)
     ---@param value - the value the property should take
     ---@param handle - (optional) if obj specifies multiple objects handle can give the handle to one of the data tables to read out property names
-    property = function(obj, index, value, handle) --FIXME property.set does not exists, find a workaround
+    property = function(obj, index, value, handle)
         handle = handle or MA.get.handle(obj)
-        cmdF('Assign %s /%s=%s',obj,MA.get.propertyName(handle,index),value)
+        if(string.match( value,"^%-?%d+$")) then
+            cmdF('Assign %s /%s=%f',obj,MA.get.propertyName(handle,index),tonumber(value))
+        else
+            cmdF('Assign %s /%s="%s"',obj,MA.get.propertyName(handle,index),value)
+        end
     end
 }
 
