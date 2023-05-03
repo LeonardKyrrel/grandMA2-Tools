@@ -115,7 +115,6 @@ MA.set = {
         handle = handle or MA.get.handle(obj)
 
         local propertyName = string.gsub(MA.get.propertyName(handle,index),"|","")
-        echo(propertyName)
         if(string.match( value,"^%-?%d+$")) then
             cmdF('Assign %s /%s=%f',obj,propertyName,tonumber(value))
         else
@@ -209,7 +208,10 @@ MA.class = {
         end,
 
         copySettingsTo = function(self, other, boolTable) --FIXME children of effect object represent single lines in the effect change approach to work with that
-            if(self.dataTable~=nil and other.dataTable~=nil) then
+            if(MA.get.exists('Effect '..self.number) and MA.get.exists('Effect '..other.number)) then
+                local amountSelf = MA.get.childCount(MA.get.handle('Effect '..self.number))
+                local amountOther = MA.get.childCount(MA.get.handle('Effect '..other.number))
+
                 boolTable = boolTable or {
                     true, -- (1) Interleave
                     false, -- (2) Attribute
@@ -230,13 +232,18 @@ MA.class = {
                     true, -- (17) Wings
                     false,} -- (18) Singel Shot
 
+                for destinationLine = 0, amountOther-1 do
+                    local sourceLine = destinationLine%amountSelf
+                    local sourceTabel = MA.get.child('Effect '..self.number,sourceLine)
 
-                for i = 1, 18 do
-                    if(boolTable[i]) then
-                        feedback('Copying %d %s',i,gma.show.property.name(self.dataTable,i))
-                        local value = MA.get.propertyValue(self.dataTable,i)
-                        cmdF('Assign Effect %d')
-                        MA.set.property(other.dataTable,i,value) 
+                    local destinationTable = MA.get.child('Effect '..other.number,destinationLine)
+                    for i = 1, 18 do
+                        if(boolTable[i]) then
+                            echo('Copying %d.%d %s',sourceLine, i, gma.show.property.name(sourceTabel,i))
+                            local value = MA.get.propertyValue(sourceTabel,i)
+                            
+                            MA.set.property(string.format('Effect 1.%d.%d',other.number,destinationLine+1),i,value,destinationTable) 
+                        end
                     end
                 end
             else
