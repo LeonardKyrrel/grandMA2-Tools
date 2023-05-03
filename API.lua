@@ -53,6 +53,10 @@ MA.get = {
         return gma.show.getobj.verify(MA.get.handle(obj))
     end,
 
+    childCount = function(handle)
+        return gma.show.getobj.amount(handle)
+    end,
+
     child = function(obj, index)
         return gma.show.getobj.child(MA.get.handle(obj),index)
     end,
