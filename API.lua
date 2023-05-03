@@ -60,8 +60,19 @@ MA.get = {
     var = gma.show.getvar,
 
 
+    ---returns the name of a property from the specified object
+    ---@param handle - see get.handle
+    ---@param index - the index of the specific property
+    ---@return name - Name of the property field 
+    propertyName = function(handle, index)
+        return gma.show.property.name(handle,index)
+    end,
 
-    property = function(handle, index)
+    ---returns the value of a property from the specified object
+    ---@param handle - see get.handle
+    ---@param index - the index of the specific property
+    ---@return value - Value of the property field
+    propertyValue = function(handle, index)
         return gma.show.property.get(handle,index)
     end
 ,
@@ -84,8 +95,9 @@ MA.get = {
 
 
 MA.set = {
-    property = function(handle, index, value) --FIXME property.set does not exists, find a workaround
-        gma.show.property.set(handle,index,value)
+    property = function(obj, index, value, handle) --FIXME property.set does not exists, find a workaround
+        handle = handle or MA.get.handle(obj)
+        cmdF('Assign %s /%s=%s',obj,MA.get.propertyName(handle,index),value)
     end
 }
 
@@ -199,7 +211,7 @@ MA.class = {
                 for i = 1, 18 do
                     if(boolTable[i]) then
                         feedback('Copying %d %s',i,gma.show.property.name(self.dataTable,i))
-                        local value = MA.get.property(self.dataTable,i)
+                        local value = MA.get.propertyValue(self.dataTable,i)
                         cmdF('Assign Effect %d')
                         MA.set.property(other.dataTable,i,value) 
                     end
