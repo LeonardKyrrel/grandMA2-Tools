@@ -59,6 +59,12 @@ MA.get = {
 
     var = gma.show.getvar,
 
+    ---returns the amount of property fields for that object
+    ---@param handle - see get.handle
+    ---@return name - amount of propertys specified for this object
+    propertyAmount = function(handle)
+        return gma.show.property.amount(handle)
+    end,
 
     ---returns the name of a property from the specified object
     ---@param handle - see get.handle
