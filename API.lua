@@ -113,10 +113,13 @@ MA.set = {
     ---@param handle number - (optional) if obj specifies multiple objects handle can give the handle to one of the data tables to read out property names
     property = function(obj, index, value, handle)
         handle = handle or MA.get.handle(obj)
+
+        local propertyName = string.gsub(MA.get.propertyName(handle,index),"|","")
+        echo(propertyName)
         if(string.match( value,"^%-?%d+$")) then
-            cmdF('Assign %s /%s=%f',obj,MA.get.propertyName(handle,index),tonumber(value))
+            cmdF('Assign %s /%s=%f',obj,propertyName,tonumber(value))
         else
-            cmdF('Assign %s /%s="%s"',obj,MA.get.propertyName(handle,index),value)
+            cmdF('Assign %s /%s="%s"',obj,propertyName,value)
         end
     end
 }
