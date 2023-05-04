@@ -209,6 +209,12 @@ MA.class = {
             return o
         end,
 
+        ---Copy properties from one effect to another
+        ---boolTable is used to define which properties to copy. 
+        ---If no settings are provided Interleave, Groups, Blocks and Wings are used as default settings
+        ---@param self table, object of the source effect
+        ---@param other table, object of the copy destination
+        ---@param boolTable table, boolean table to define which properties to copy
         copySettingsTo = function(self, other, boolTable)
             if(MA.get.exists('Effect '..self.number) and MA.get.exists('Effect '..other.number)) then
                 local amountSelf = MA.get.childCount(MA.get.handle('Effect '..self.number))
