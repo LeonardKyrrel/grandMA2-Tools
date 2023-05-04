@@ -1,3 +1,63 @@
+---
+--- Created by geroh.
+--- DateTime: 04.05.2023 10:00
+---
+---
+---Description:
+--- This plugin can be used to copy "settings" from one existing effect to another. (The effects both have to already exists in the effect pool)
+--- e.g. if there is a dimmer effect and a seperate color effect this plugin can be used to transfere settings like groups or wings from one to the other.
+--- Currently all properties can be transfered except selection an attribute type.
+--- If an effect has multiple lines e.g. R,G,B the plugin copies the settings of line one of the source to line 1 of the destination and so on.
+--- In case the destination has more lines than the source the pattern of the source gets repeated until all lines in the destination have new values.
+---
+---Usage: 
+---     -Select the properties that should be transfered by editing the table below
+---     -Start the plugin and enter the number of the effec you want to  copy to/from
+---
+---
+---Notes: 
+---     -Attribute type can not be copied
+---     -Selection can currently not be transfered
+---     -When copying high or low values there can be problems when copying from one fixturetype to another or across different attributes
+
+
+
+----Set all properties that should be copied to true---
+
+local copySettings = {
+    true, -- (1) Interleave
+    false, -- (2) Attribute       >>>>THE ATTRIBUTE PROPERTY OF AN EFFECT CAN NOT BE COPIED USING THIS PLUGIN!<<<<<
+    false, -- (3) Mode (abs/rel)
+    false, -- (4) Form              
+    false, -- (5) Rate
+    false, -- (6) Speed
+    false, -- (7) Speed Group
+    false, -- (8) Dir (</>/Bounce</Bounce>)
+    false, -- (9) Low value
+    false, -- (10) High value
+    false, -- (11) Phase
+    false, -- (12) Width
+    false, -- (13) Attack
+    false, -- (14) Decay
+    true, -- (15) Groups
+    true, -- (16) Blocks
+    true, -- (17) Wings
+    false,} -- (18) Singel Shot 
+
+
+
+-------------------------------------- 
+----DO NOT EDIT BEYOND THIS POINT-----
+--------------------------------------   
+
+
+    
+-----------------------------------------------------
+----API----------------------------------------------
+-----------------------------------------------------
+
+
+
 MA = {}
 local report = {}
 
@@ -108,6 +168,12 @@ MA.class = {
             return o
         end,
 
+        ---Copy properties from one effect to another
+        ---boolTable is used to define which properties to copy. 
+        ---If no settings are provided Interleave, Groups, Blocks and Wings are used as default settings
+        ---@param self table, object of the source effect
+        ---@param other table, object of the copy destination
+        ---@param boolTable table, boolean table to define which properties to cop
         copySettingsTo = function(self, other, boolTable)
             if(MA.get.exists('Effect '..self.number) and MA.get.exists('Effect '..other.number)) then
                 local amountSelf = MA.get.childCount(MA.get.handle('Effect '..self.number))
@@ -176,38 +242,6 @@ local Effect = class.Effect
 local tIn = get.textinput
 
 
---------------------------------------
-----PLUGIN CODE-----------------------
-----EDIT HERE-------------------------
---------------------------------------
-
-----Set all properties that should be copied to true---
-
-local copySettings = {
-                    true, -- (1) Interleave
-                    false, -- (2) Attribute       >>>>THE ATTRIBUTE PROPERTY OF AN EFFECT CAN NOT BE COPIED USING THIS PLUGIN!<<<<<
-                    false, -- (3) Mode (abs/rel)
-                    false, -- (4) Form              
-                    false, -- (5) Rate
-                    false, -- (6) Speed
-                    false, -- (7) Speed Group
-                    false, -- (8) Dir (</>/Bounce</Bounce>)
-                    false, -- (9) Low value
-                    false, -- (10) High value
-                    false, -- (11) Phase
-                    false, -- (12) Width
-                    false, -- (13) Attack
-                    false, -- (14) Decay
-                    true, -- (15) Groups
-                    true, -- (16) Blocks
-                    true, -- (17) Wings
-                    false,} -- (18) Singel Shot 
-
-
--------------------------------------- 
-----DO NOT EDIT BEYOND THIS POINT-----
---------------------------------------                    
-
 function copyEffectSettings()
     local userSource = tonumber(tIn('Copy from (Effect number)',''))
     local userDest = tIn('Copy to','') --TODO add support for range of effects
@@ -226,3 +260,5 @@ function copyEffectSettings()
 
     effectSoure:copySettingsTo(effectDest,copySettings)
 end
+
+return copyEffectSettings
