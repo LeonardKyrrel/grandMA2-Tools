@@ -209,12 +209,12 @@ MA.class = {
             return o
         end,
 
-        copySettingsTo = function(self, other, boolTable)--TODO Fix: Phase Rate+Speed+Speedgroup
+        copySettingsTo = function(self, other, boolTable)
             if(MA.get.exists('Effect '..self.number) and MA.get.exists('Effect '..other.number)) then
                 local amountSelf = MA.get.childCount(MA.get.handle('Effect '..self.number))
                 local amountOther = MA.get.childCount(MA.get.handle('Effect '..other.number))
 
-                boolTable = boolTable or {
+                boolTable = boolTable or { --default settings
                     true, -- (1) Interleave
                     false, -- (2) Attribute         -> special assign syntax
                     false, -- (3) Mode (abs/rel)
@@ -275,13 +275,3 @@ local class = MA.class
 local Effect = class.Effect
 
 local tIn = get.textinput
-
-function test()
-    local source = Effect:new(1)
-    local dest = Effect:new(2)
-
-    source:copySettingsTo(dest)
-end
-
-
-return test
