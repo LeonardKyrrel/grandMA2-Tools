@@ -214,9 +214,9 @@ MA.class = {
 
                 boolTable = boolTable or {
                     true, -- (1) Interleave
-                    false, -- (2) Attribute
+                    false, -- (2) Attribute         -> special assign syntax
                     false, -- (3) Mode (abs/rel)
-                    false, -- (4) Form
+                    false, -- (4) Form              -> special assign syntax
                     false, -- (5) Rate
                     false, -- (6) Speed
                     false, -- (7) Speed Group
@@ -230,7 +230,7 @@ MA.class = {
                     true, -- (15) Groups
                     true, -- (16) Blocks
                     true, -- (17) Wings
-                    false,} -- (18) Singel Shot
+                    false,} -- (18) Singel Shot 
 
                 for destinationLine = 0, amountOther-1 do
                     local sourceLine = destinationLine%amountSelf
