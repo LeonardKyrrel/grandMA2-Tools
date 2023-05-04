@@ -238,16 +238,14 @@ MA.class = {
 
                     local destinationTable = MA.get.child('Effect '..other.number,destinationLine)
                     for i = 1, 18 do
-                        if(boolTable[i]) then
+                        if(boolTable[i] and not i == 2) then
+                            --Attribute copying is disabled because due to the mapping from the propertys from source to destination
+                            -- there could be more than one line with the same attribute created in the destination thereby breaking that line.
 
                             echo('Copying %d.%d %s',sourceLine, i, gma.show.property.name(sourceTabel,i))
                             local value = MA.get.propertyValue(sourceTabel,i)
                             
-                            if(i == 2) then --handle attribute property
-                                --Attribute copying is disabled because due to the mapping from the propertys from source to destination
-                                -- there could be more than one line with the same attribute created in the destination thereby breaking that line.
-                                --cmdF('Assign Attribute "%s" at Effect 1.%d.%d',value,other.number,destinationLine+1)
-                            elseif i == 4 then --handle form property
+                            if i == 4 then --handle form property
                                 local splitTable = {}
                                 for str in string.gmatch(value,"([^%s]+)") do
                                     splitTable[#splitTable+1] = str
