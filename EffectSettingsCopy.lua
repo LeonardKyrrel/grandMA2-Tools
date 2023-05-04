@@ -160,7 +160,6 @@ MA.class = {
         new = function (self, number)
             local o = {}
             o.number = number
-            feedback('Created effect object for effect %d',number)
 
             setmetatable(o,self)
             self.__index = self
@@ -211,8 +210,6 @@ MA.class = {
                         if(boolTable[i] and i ~= 2) then
                             --Attribute copying is disabled because due to the mapping from the propertys from source to destination
                             -- there could be more than one line with the same attribute created in the destination thereby breaking that line.
-                            
-                            echo('Copying %d.%d %s',sourceLine, i, gma.show.property.name(sourceTabel,i))
                             local value = MA.get.propertyValue(sourceTabel,i)
                             
                             if i == 4 then --handle form property
