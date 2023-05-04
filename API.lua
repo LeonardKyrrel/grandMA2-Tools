@@ -116,9 +116,10 @@ MA.set = {
 
         local propertyName = string.gsub(MA.get.propertyName(handle,index),"|","")
         propertyName = string.gsub(propertyName," ","")
-        if(string.match( value,"^%-?%d+$")) then
-            cmdF('Assign %s /%s=%f',obj,propertyName,tonumber(value))
+        if(not string.match( value,"[a-zA-Z]") and not string.match(value,"%.%.")) then
+            cmdF('Assign %s /%s=%s',obj,propertyName,value)
         else
+            value = string.gsub(value,"|"," ")
             cmdF('Assign %s /%s="%s"',obj,propertyName,value)
         end
     end
