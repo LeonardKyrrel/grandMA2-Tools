@@ -207,7 +207,7 @@ MA.class = {
             return o
         end,
 
-        copySettingsTo = function(self, other, boolTable) --FIXME children of effect object represent single lines in the effect change approach to work with that
+        copySettingsTo = function(self, other, boolTable)
             if(MA.get.exists('Effect '..self.number) and MA.get.exists('Effect '..other.number)) then
                 local amountSelf = MA.get.childCount(MA.get.handle('Effect '..self.number))
                 local amountOther = MA.get.childCount(MA.get.handle('Effect '..other.number))
@@ -238,7 +238,7 @@ MA.class = {
 
                     local destinationTable = MA.get.child('Effect '..other.number,destinationLine)
                     for i = 1, 18 do
-                        if(boolTable[i] and not i == 2) then
+                        if(boolTable[i] and i ~= 2) then
                             --Attribute copying is disabled because due to the mapping from the propertys from source to destination
                             -- there could be more than one line with the same attribute created in the destination thereby breaking that line.
 
