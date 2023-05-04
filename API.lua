@@ -234,6 +234,9 @@ MA.class = {
                     true, -- (17) Wings
                     false,} -- (18) Singel Shot 
 
+
+                boolTable[6] = boolTable[6] and not boolTable[7] and not boolTable[5] --disable speed copy if speedmaster or rate are copied as well (the properties overwrite each other)
+
                 for destinationLine = 0, amountOther-1 do
                     local sourceLine = destinationLine%amountSelf
                     local sourceTabel = MA.get.child('Effect '..self.number,sourceLine)
@@ -243,7 +246,7 @@ MA.class = {
                         if(boolTable[i] and i ~= 2) then
                             --Attribute copying is disabled because due to the mapping from the propertys from source to destination
                             -- there could be more than one line with the same attribute created in the destination thereby breaking that line.
-
+                            
                             echo('Copying %d.%d %s',sourceLine, i, gma.show.property.name(sourceTabel,i))
                             local value = MA.get.propertyValue(sourceTabel,i)
                             
@@ -279,5 +282,6 @@ function test()
 
     source:copySettingsTo(dest)
 end
+
 
 return test
