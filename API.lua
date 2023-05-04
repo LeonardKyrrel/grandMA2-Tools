@@ -115,6 +115,7 @@ MA.set = {
         handle = handle or MA.get.handle(obj)
 
         local propertyName = string.gsub(MA.get.propertyName(handle,index),"|","")
+        propertyName = string.gsub(propertyName," ","")
         if(string.match( value,"^%-?%d+$")) then
             cmdF('Assign %s /%s=%f',obj,propertyName,tonumber(value))
         else
@@ -207,7 +208,7 @@ MA.class = {
             return o
         end,
 
-        copySettingsTo = function(self, other, boolTable)
+        copySettingsTo = function(self, other, boolTable)--TODO Fix: Phase Rate+Speed+Speedgroup
             if(MA.get.exists('Effect '..self.number) and MA.get.exists('Effect '..other.number)) then
                 local amountSelf = MA.get.childCount(MA.get.handle('Effect '..self.number))
                 local amountOther = MA.get.childCount(MA.get.handle('Effect '..other.number))
