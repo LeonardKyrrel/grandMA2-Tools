@@ -284,9 +284,8 @@ function copyEffectSettings()
 
 
 
-    local userDest = tIn('Copy to','')
+    local userDest = tIn('Copy to','') --TODO change to use one assign statement per effect
     if(string.match(userDest,"thru") or string.match(userDest,"Thru") or string.match(userDest,"+") or string.match(userDest,"-")) then --process range string pattern
-        printTest('Range detected')
 
         local destTable = {}
         local lastNumber
@@ -294,23 +293,19 @@ function copyEffectSettings()
         local expectingNumber = true
 
         for str in string.gmatch(userDest,"%S+") do --split by spaces and itterate over all resulting strings
-            printTest("str:%s",str)
 
             if(expectingNumber and str:match("[0-9]")) then
                 local currentNumber = tonumber(str)
 
                 if(not lastNumber or lastOperator == "+") then --if this is the first number read
-                    printTest("Adding number %d",currentNumber)
                     lastNumber = currentNumber
                     destTable[#destTable+1] = currentNumber
                 elseif(lastOperator == 'Thru' or lastOperator == 'thru') then
-                    printTest('Adding list %d-%d',lastNumber,currentNumber)
                     for i = lastNumber+1, currentNumber do
                         destTable[#destTable+1] = i
                     end
                     lastNumber = currentNumber
                 elseif(lastOperator == "-") then
-                    printTest('Subtracting number %d',currentNumber)
                     lastNumber = currentNumber
                     for i = 1, #destTable do
                         if(destTable[i] == currentNumber) then
@@ -318,7 +313,6 @@ function copyEffectSettings()
                         end
                     end
                 else
-                    printError("Malformed range string reading number: %s",str)
                     return
                 end
                 expectingNumber = false
@@ -327,13 +321,11 @@ function copyEffectSettings()
                 lastOperator = str
                 expectingNumber = true
             else
-                printError("Malformed range string reading operator: %s",str)
                 return
             end
         end
 
         for i = 1, #destTable do
-            printTest("Index %d: %d",i,destTable[i])
 
             local currentDest = destTable[i]
             local effectDest = class.Effect:new(currentDest)
