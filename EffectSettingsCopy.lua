@@ -279,12 +279,12 @@ function copyEffectSettings()
     end
     if(singleLineCopy) then 
         local lineCount = get.childCount(get.handle("Effect "..effectSoure.number))
-        sourceEffectLine = tonumber(tIn("Choose Source Line (1-".. lineCount ..")",''))-1 --TODO add input verification
+        sourceEffectLine = tonumber(tIn("Choose Source Line (1-".. lineCount ..")",''))-1
     end
 
 
 
-    local userDest = tIn('Copy to','') --TODO change to use one assign statement per effect
+    local userDest = tIn('Copy to','')
     if(string.match(userDest,"thru") or string.match(userDest,"Thru") or string.match(userDest,"+") or string.match(userDest,"-")) then --process range string pattern
 
         local destTable = {}
