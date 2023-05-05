@@ -4,15 +4,16 @@
 ---
 ---
 ---Description:
---- This plugin can be used to copy "settings" from one existing effect to another. (The effects both have to already exists in the effect pool)
+--- This plugin can be used to copy "settings" from one existing effect to other effects. (The effects have to already exists in the effect pool)
 --- e.g. if there is a dimmer effect and a seperate color effect this plugin can be used to transfere settings like groups or wings from one to the other.
 --- Currently all properties can be transfered except selection an attribute type.
---- If an effect has multiple lines e.g. R,G,B the plugin copies the settings of line one of the source to line 1 of the destination and so on.
---- In case the destination has more lines than the source the pattern of the source gets repeated until all lines in the destination have new values.
+--- The user can decide if the properties of one specific line should be copied to all lines of the destination effects or if the all lines in the source should be mapped to the destination effects.
+--- For the destination the user can enter a range of effects as one would in the command line. (e.g. 1 Thru 20 - 5 + 42)  -> Accepted operators are: {Thru, thru, +, -}
 ---
 ---Usage: 
 ---     -Select the properties that should be transfered by editing the table below
----     -Start the plugin and enter the number of the effec you want to  copy to/from
+---     -Choose if only a single line should be used as the source 
+---     -Start the plugin and enter the number of the effec you want to copy to/from
 ---
 ---
 ---Notes: 
@@ -44,6 +45,9 @@ local copySettings = {
     true, -- (17) Wings
     false,} -- (18) Singel Shot 
 
+local singleLineCopy = true     --if set to true the plugin asks for the line in the source effect from wich the data should be copied (given the effect has more than one line)
+                                --otherwise it will cycle over all lines of the source effect until all lines in the destination have received new values
+
 
 
 -------------------------------------- 
@@ -60,6 +64,7 @@ local copySettings = {
 
 MA = {}
 local report = {}
+local sourceEffectLine
 
 function echo(...)
     gma.echo(string.format(...))
@@ -67,6 +72,26 @@ end
 
 function feedback(...)
     gma.feedback(string.format(...))
+end
+
+---Get the escape code to set the following text in the command line to the specified color
+---@param color string - Set the color. Can be: BLACK; RED; YELLOW; GREEN; CYAN; BLUE; MAGENTA; WHITE.
+---@return string - Escape code 
+function colorEscape(color)
+    local colorCodes = {BLACK = 30, RED = 31, GREEN = 32, YELLOW = 33, BLUE = 34, CYAN = 35, MAGENTA = 36, WHITE = 37}
+    return string.char(27) .. "[" .. colorCodes[color] .. "m"
+end
+
+---Can be used to make debug prints. Output will be shown in cyan
+---@param ... unknown -input for string.format( "formatstring",... )
+function printTest(...)
+    feedback(colorEscape("CYAN")..string.format(...))
+end
+
+---Can be used to print warnings/errors for the user while running a plugin
+---@param ... unknown - input for string.format( "formatstring",... )
+function printError(...)
+    feedback(colorEscape("YELLOW")..">>>"..colorEscape("RED")..string.format(...)..colorEscape("YELLOW").."<<<")
 end
 
 function labelObj(obj,number,name)
@@ -201,9 +226,14 @@ MA.class = {
 
                 boolTable[6] = boolTable[6] and not boolTable[7] and not boolTable[5] --disable speed copy if speedmaster or rate are copied as well (the properties overwrite each other)
 
+                local sourceLine = sourceEffectLine
+                local sourceTabel = MA.get.child('Effect '..self.number,sourceLine)
+
                 for destinationLine = 0, amountOther-1 do
-                    local sourceLine = destinationLine%amountSelf
-                    local sourceTabel = MA.get.child('Effect '..self.number,sourceLine)
+                    if(not singleLineCopy) then
+                        sourceLine = destinationLine%amountSelf
+                        sourceTabel = MA.get.child('Effect '..self.number,sourceLine)
+                    end
 
                     local destinationTable = MA.get.child('Effect '..other.number,destinationLine)
                     for i = 1, 18 do
@@ -241,21 +271,85 @@ local tIn = get.textinput
 
 function copyEffectSettings()
     local userSource = tonumber(tIn('Copy from (Effect number)',''))
-    local userDest = tIn('Copy to','') --TODO add support for range of effects
 
     local effectSoure = class.Effect:new(userSource)
     if(not get.exists('Effect '..effectSoure.number)) then
-        feedback("Copy source (Effect %d) does not exist",effectSoure.number)
+        printError("Copy source (Effect %d) does not exist",effectSoure.number)
         return
     end
-
-    local effectDest = class.Effect:new(userDest)
-    if(not get.exists('Effect '..effectDest.number)) then
-        feedback("Copy destination (Effect %d) does not exist",effectDest.number)
-        return
+    if(singleLineCopy) then 
+        local lineCount = get.childCount(get.handle("Effect "..effectSoure.number))
+        sourceEffectLine = tonumber(tIn("Choose Source Line (1-".. lineCount ..")",''))-1
     end
 
-    effectSoure:copySettingsTo(effectDest,copySettings)
+
+
+    local userDest = tIn('Copy to','')
+    if(string.match(userDest,"thru") or string.match(userDest,"Thru") or string.match(userDest,"+") or string.match(userDest,"-")) then --process range string pattern
+
+        local destTable = {}
+        local lastNumber
+        local lastOperator
+        local expectingNumber = true
+
+        for str in string.gmatch(userDest,"%S+") do --split by spaces and itterate over all resulting strings
+
+            if(expectingNumber and str:match("[0-9]")) then
+                local currentNumber = tonumber(str)
+
+                if(not lastNumber or lastOperator == "+") then --if this is the first number read
+                    lastNumber = currentNumber
+                    destTable[#destTable+1] = currentNumber
+                elseif(lastOperator == 'Thru' or lastOperator == 'thru') then
+                    for i = lastNumber+1, currentNumber do
+                        destTable[#destTable+1] = i
+                    end
+                    lastNumber = currentNumber
+                elseif(lastOperator == "-") then
+                    lastNumber = currentNumber
+                    for i = 1, #destTable do
+                        if(destTable[i] == currentNumber) then
+                            table.remove(destTable,i)
+                        end
+                    end
+                else
+                    return
+                end
+                expectingNumber = false
+                lastOperator = nil
+            elseif((not expectingNumber) and (str=="thru" or str == "Thru" or str == "+" or str == "-")) then
+                lastOperator = str
+                expectingNumber = true
+            else
+                return
+            end
+        end
+
+        for i = 1, #destTable do
+
+            local currentDest = destTable[i]
+            local effectDest = class.Effect:new(currentDest)
+            if(tonumber(userSource) == tonumber(currentDest))then
+                printError('Source and destination are equal (Source: %d; Dest: %d)',userSource,currentDest)
+            elseif(not get.exists('Effect '.. effectDest.number)) then
+                printError("Copy destination (Effect %d) does not exist",effectDest.number)
+            end
+
+            effectSoure:copySettingsTo(effectDest,copySettings)
+        end
+    else
+
+        local effectDest = class.Effect:new(userDest)
+        if(tonumber(userSource) == tonumber(userDest))then
+            printError('Source and destination are equal')
+            return
+        elseif(not get.exists('Effect '..effectDest.number)) then
+            printError("Copy destination (Effect %d) does not exist",effectDest.number)
+            return
+        end
+
+        effectSoure:copySettingsTo(effectDest,copySettings)
+    end
 end
 
 return copyEffectSettings
