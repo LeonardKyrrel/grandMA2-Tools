@@ -283,16 +283,80 @@ function copyEffectSettings()
 
 
 
-    local userDest = tIn('Copy to','') --TODO add support for range of effects
-    local effectDest = class.Effect:new(userDest)
-    if(userSource == userDest)then
-        printError('Error source and destination are equal')
-    elseif(not get.exists('Effect '..effectDest.number)) then
-        printError("Copy destination (Effect %d) does not exist",effectDest.number)
-        return
-    end
+    local userDest = tIn('Copy to','')
+    if(string.match(userDest,"thru") or string.match(userDest,"Thru") or string.match(userDest,"+") or string.match(userDest,"-")) then --process range string pattern
+        printTest('Range detected')
 
-    effectSoure:copySettingsTo(effectDest,copySettings)
+        local destTable = {}
+        local lastNumber
+        local lastOperator
+        local expectingNumber = true
+
+        for str in string.gmatch(userDest,"%S+") do --split by spaces and itterate over all resulting strings
+            printTest("str:%s",str)
+
+            if(expectingNumber and str:match("[0-9]")) then
+                local currentNumber = tonumber(str)
+
+                if(not lastNumber or lastOperator == "+") then --if this is the first number read
+                    printTest("Adding number %d",currentNumber)
+                    lastNumber = currentNumber
+                    destTable[#destTable+1] = currentNumber
+                elseif(lastOperator == 'Thru' or lastOperator == 'thru') then
+                    printTest('Adding list %d-%d',lastNumber,currentNumber)
+                    for i = lastNumber+1, currentNumber do
+                        destTable[#destTable+1] = i
+                    end
+                    lastNumber = currentNumber
+                elseif(lastOperator == "-") then
+                    printTest('Subtracting number %d',currentNumber)
+                    lastNumber = currentNumber
+                    for i = 1, #destTable do
+                        if(destTable[i] == currentNumber) then
+                            table.remove(destTable,i)
+                        end
+                    end
+                else
+                    printError("Malformed range string reading number: %s",str)
+                    return
+                end
+                expectingNumber = false
+                lastOperator = nil
+            elseif((not expectingNumber) and (str=="thru" or str == "Thru" or str == "+" or str == "-")) then
+                lastOperator = str
+                expectingNumber = true
+            else
+                printError("Malformed range string reading operator: %s",str)
+                return
+            end
+        end
+
+        for i = 1, #destTable do
+            printTest("Index %d: %d",i,destTable[i])
+
+            local currentDest = destTable[i]
+            local effectDest = class.Effect:new(currentDest)
+            if(tonumber(userSource) == tonumber(currentDest))then
+                printError('Source and destination are equal (Source: %d; Dest: %d)',userSource,currentDest)
+            elseif(not get.exists('Effect '.. effectDest.number)) then
+                printError("Copy destination (Effect %d) does not exist",effectDest.number)
+            end
+
+            effectSoure:copySettingsTo(effectDest,copySettings)
+        end
+    else
+
+        local effectDest = class.Effect:new(userDest)
+        if(tonumber(userSource) == tonumber(userDest))then
+            printError('Source and destination are equal')
+            return
+        elseif(not get.exists('Effect '..effectDest.number)) then
+            printError("Copy destination (Effect %d) does not exist",effectDest.number)
+            return
+        end
+
+        effectSoure:copySettingsTo(effectDest,copySettings)
+    end
 end
 
 return copyEffectSettings
