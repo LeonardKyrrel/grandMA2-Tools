@@ -7,11 +7,11 @@
 --- This plugin can be used to copy "settings" from one existing effect to another. (The effects both have to already exists in the effect pool)
 --- e.g. if there is a dimmer effect and a seperate color effect this plugin can be used to transfere settings like groups or wings from one to the other.
 --- Currently all properties can be transfered except selection an attribute type.
---- If an effect has multiple lines e.g. R,G,B the plugin copies the settings of line one of the source to line 1 of the destination and so on.
---- In case the destination has more lines than the source the pattern of the source gets repeated until all lines in the destination have new values.
+--- The user can decide if the properties of one specific line should be copied to all lines of the destination effects or if the all lines in the source should be mapped to the destination effects.
 ---
 ---Usage: 
 ---     -Select the properties that should be transfered by editing the table below
+---     -Choose if only a single line should be used as the source 
 ---     -Start the plugin and enter the number of the effec you want to  copy to/from
 ---
 ---
@@ -44,6 +44,9 @@ local copySettings = {
     true, -- (17) Wings
     false,} -- (18) Singel Shot 
 
+local singleLineCopy = true     --if set to true the plugin asks for the line in the source effect from wich the data should be copied (given the effect has more than one line)
+                                --otherwise it will cycle over all lines of the source effect until all lines in the destination have received new values
+
 
 
 -------------------------------------- 
@@ -60,6 +63,7 @@ local copySettings = {
 
 MA = {}
 local report = {}
+local sourceEffectLine
 
 function echo(...)
     gma.echo(string.format(...))
@@ -221,9 +225,14 @@ MA.class = {
 
                 boolTable[6] = boolTable[6] and not boolTable[7] and not boolTable[5] --disable speed copy if speedmaster or rate are copied as well (the properties overwrite each other)
 
+                local sourceLine = sourceEffectLine
+                local sourceTabel = MA.get.child('Effect '..self.number,sourceLine)
+
                 for destinationLine = 0, amountOther-1 do
-                    local sourceLine = destinationLine%amountSelf
-                    local sourceTabel = MA.get.child('Effect '..self.number,sourceLine)
+                    if(not singleLineCopy) then
+                        sourceLine = destinationLine%amountSelf
+                        sourceTabel = MA.get.child('Effect '..self.number,sourceLine)
+                    end
 
                     local destinationTable = MA.get.child('Effect '..other.number,destinationLine)
                     for i = 1, 18 do
@@ -261,17 +270,25 @@ local tIn = get.textinput
 
 function copyEffectSettings()
     local userSource = tonumber(tIn('Copy from (Effect number)',''))
-    local userDest = tIn('Copy to','') --TODO add support for range of effects
 
     local effectSoure = class.Effect:new(userSource)
     if(not get.exists('Effect '..effectSoure.number)) then
-        feedback("Copy source (Effect %d) does not exist",effectSoure.number)
+        printError("Copy source (Effect %d) does not exist",effectSoure.number)
         return
     end
+    if(singleLineCopy) then 
+        local lineCount = get.childCount(get.handle("Effect "..effectSoure.number))
+        sourceEffectLine = tonumber(tIn("Choose Source Line (1-".. lineCount ..")",''))-1 --TODO add input verification
+    end
 
+
+
+    local userDest = tIn('Copy to','') --TODO add support for range of effects
     local effectDest = class.Effect:new(userDest)
-    if(not get.exists('Effect '..effectDest.number)) then
-        feedback("Copy destination (Effect %d) does not exist",effectDest.number)
+    if(userSource == userDest)then
+        printError('Error source and destination are equal')
+    elseif(not get.exists('Effect '..effectDest.number)) then
+        printError("Copy destination (Effect %d) does not exist",effectDest.number)
         return
     end
 
