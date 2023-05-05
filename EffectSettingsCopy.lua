@@ -69,6 +69,26 @@ function feedback(...)
     gma.feedback(string.format(...))
 end
 
+---Get the escape code to set the following text in the command line to the specified color
+---@param color string - Set the color. Can be: BLACK; RED; YELLOW; GREEN; CYAN; BLUE; MAGENTA; WHITE.
+---@return string - Escape code 
+function colorEscape(color)
+    local colorCodes = {BLACK = 30, RED = 31, GREEN = 32, YELLOW = 33, BLUE = 34, CYAN = 35, MAGENTA = 36, WHITE = 37}
+    return string.char(27) .. "[" .. colorCodes[color] .. "m"
+end
+
+---Can be used to make debug prints. Output will be shown in cyan
+---@param ... unknown -input for string.format( "formatstring",... )
+function printTest(...)
+    feedback(colorEscape("CYAN")..string.format(...))
+end
+
+---Can be used to print warnings/errors for the user while running a plugin
+---@param ... unknown - input for string.format( "formatstring",... )
+function printError(...)
+    feedback(colorEscape("YELLOW")..">>>"..colorEscape("RED")..string.format(...)..colorEscape("YELLOW").."<<<")
+end
+
 function labelObj(obj,number,name)
     cmdF('Label %s %s "%s"',obj,number,name)
 end
