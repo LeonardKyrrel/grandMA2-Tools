@@ -4,15 +4,16 @@
 ---
 ---
 ---Description:
---- This plugin can be used to copy "settings" from one existing effect to another. (The effects both have to already exists in the effect pool)
+--- This plugin can be used to copy "settings" from one existing effect to other effects. (The effects have to already exists in the effect pool)
 --- e.g. if there is a dimmer effect and a seperate color effect this plugin can be used to transfere settings like groups or wings from one to the other.
 --- Currently all properties can be transfered except selection an attribute type.
 --- The user can decide if the properties of one specific line should be copied to all lines of the destination effects or if the all lines in the source should be mapped to the destination effects.
+--- For the destination the user can enter a range of effects as one would in the command line. (e.g. 1 Thru 20 - 5 + 42)  -> Accepted operators are: {Thru, thru, +, -}
 ---
 ---Usage: 
 ---     -Select the properties that should be transfered by editing the table below
 ---     -Choose if only a single line should be used as the source 
----     -Start the plugin and enter the number of the effec you want to  copy to/from
+---     -Start the plugin and enter the number of the effec you want to copy to/from
 ---
 ---
 ---Notes: 
