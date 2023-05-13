@@ -19,6 +19,7 @@
 ---
 ---
 ---Notes: 
+---     -When loading a the show on a new console the plugin must be run again to initialize the functions. Setup can be skipped in this case by entering "n" in the popup
 ---     -Update can not be used to update presets while working with this plugin!
 ---     -Store the lowlight preset at a position in the preset pool that won't be touched, as the plugin writes presets 
 ---      to store values and will overwrite any presets near the lowlight preset
@@ -187,6 +188,9 @@ local bufferPreset
 local deactivationPreset
 
 function setup()
+    if(gma.textinput('Create Macros?','y/n') ~= 'y') then --get user input to confirm setupt should run
+        return
+    end
     --create lowlightPreset if none is set
     if(lowlightPreset == nil) then
         lowlightPreset = 1
