@@ -289,7 +289,8 @@ function copyEffectSettings()
 
         local destTable = {}
         local lastNumber
-        local lastOperator
+        local currentOperator
+        local previousOperator
         local expectingNumber = true
 
         for str in string.gmatch(userDest,"%S+") do --split by spaces and itterate over all resulting strings
@@ -297,34 +298,49 @@ function copyEffectSettings()
             if(expectingNumber and str:match("[0-9]")) then
                 local currentNumber = tonumber(str)
 
-                if(not lastNumber or lastOperator == "+") then --if this is the first number read
+                if(not lastNumber or currentOperator == "+") then --if this is the first number read
                     lastNumber = currentNumber
                     destTable[#destTable+1] = currentNumber
-                elseif(lastOperator == 'Thru' or lastOperator == 'thru') then
-                    for i = lastNumber+1, currentNumber do
-                        destTable[#destTable+1] = i
+                elseif(currentOperator == 'Thru' or currentOperator == 'thru') then
+                    local prev = previousOperator or "nil"
+                    printTest("Thru with prev op: "..prev)
+                    if(previousOperator == '-') then
+                        for r = lastNumber+1, currentNumber do
+                            for i = 1, #destTable do
+                                if(destTable[i]==r) then
+                                    table.remove(destTable,i)
+                                    i = i-1
+                                    break
+                                end
+                            end
+                        end
+                    else
+                        for i = lastNumber+1, currentNumber do
+                            destTable[#destTable+1] = i
+                        end
                     end
                     lastNumber = currentNumber
-                elseif(lastOperator == "-") then
+                elseif(currentOperator == "-") then
                     lastNumber = currentNumber
                     for i = 1, #destTable do
                         if(destTable[i] == currentNumber) then
                             table.remove(destTable,i)
+                            break
                         end
                     end
                 else
                     return
                 end
                 expectingNumber = false
-                lastOperator = nil
             elseif((not expectingNumber) and (str=="thru" or str == "Thru" or str == "+" or str == "-")) then
-                lastOperator = str
+                previousOperator = currentOperator
+                currentOperator = str
                 expectingNumber = true
             else
                 return
             end
         end
-
+        
         for i = 1, #destTable do
 
             local currentDest = destTable[i]
