@@ -280,6 +280,10 @@ function copyEffectSettings()
     if(singleLineCopy) then 
         local lineCount = get.childCount(get.handle("Effect "..effectSoure.number))
         sourceEffectLine = tonumber(tIn("Choose Source Line (1-".. lineCount ..")",''))-1
+        while (not (0 <= sourceEffectLine and sourceEffectLine< lineCount)) do
+            printError("Effect %d has no line %d please enter a number between 1 and %d",effectSoure.number,sourceEffectLine,lineCount)
+            sourceEffectLine = tonumber(tIn("Choose Source Line (1-".. lineCount ..")",''))-1
+        end 
     end
 
 
